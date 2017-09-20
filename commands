@@ -1,0 +1,1 @@
+oozie job -oozie http://quickstart.cloudera:11000/oozie/ -config wf.properties -run

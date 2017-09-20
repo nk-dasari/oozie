@@ -1,0 +1,18 @@
+<workflow-app name="training-wf" xmlns="uri:oozie:workflow:0.1">
+
+	<start to="emailAction" />
+	<action name="emailAction">
+		<email xmlns="uri:oozie:email-action:0.1">
+			<to>nareshdasari@outlook.com</to>
+			<cc>nareshdasari@outlook.com</cc>
+			<subject>Email notifications for ${wf:id()}</subject>
+			<body>The wf ${wf:id()} successfully completed.</body>
+		</email>
+		<ok to="end" />
+		<error to="killjob" />
+	</action>
+	<kill name="killjob">
+		<message>${wf:id()} Failed</message>
+	</kill>
+	<end name="end"></end>
+</workflow-app>
