@@ -12,7 +12,7 @@
 		<error to="killjob" />
 	</action>
 	<kill name="killjob">
-		<message>${wf:id()} Failed</message>
+		<message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
 	</kill>
 	<end name="end"></end>
 </workflow-app>
