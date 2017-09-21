@@ -14,5 +14,7 @@
 	<kill name="killjob">
 		<message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
 	</kill>
-	<end name="end"></end>
+	<end name="end">
+		<message>Action SUCCESSFULL [${wf:id()]</message>
+	</end>
 </workflow-app>
