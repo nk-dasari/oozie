@@ -1,1 +1,11 @@
-oozie job -oozie http://quickstart.cloudera:11000/oozie/ -config wf.properties -run
+To submit a job
+----------------
+oozie job -oozie http://quickstart.cloudera:11000/oozie/ -config WF.properties -run
+
+To find the info of job
+------------------------
+oozie job -oozie http://quickstart.cloudera:11000/oozie/ -info jobid
+
+To kill a job
+-------------
+oozie job -oozie http://quickstart.cloudera:11000/oozie/ -kill jobid

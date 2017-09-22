@@ -1,20 +1,47 @@
 <workflow-app name="training-wf" xmlns="uri:oozie:workflow:0.1">
-
-	<start to="emailAction" />
-	<action name="emailAction">
-		<email xmlns="uri:oozie:email-action:0.1">
-			<to>nareshdasari@outlook.com</to>
-			<cc>nareshdasari@outlook.com</cc>
-			<subject>Email notifications for ${wf:id()}</subject>
-			<body>The wf ${wf:id()} successfully completed.</body>
-		</email>
-		<ok to="end" />
-		<error to="killjob" />
+	
+	<start to="shellAction" />
+	<action name='shellAction'>
+		<shell xmlns="uri:oozie:shell-action:0.1">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<exec>${EXEC}</exec>
+			<argument>A</argument>
+			<argument>B</argument>
+			<file>${EXEC}#${EXEC}</file> <!--Copy the executable to compute node's current working directory -->
+		</shell>
+		<ok to="hiveStep" />
+		<error to="fail" />
 	</action>
-	<kill name="killjob">
-		<message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	<action name="hiveStep">
+		<hive xmlns="uri:oozie:hive-action:0.2">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<job-xml>hive-site.xml</job-xml>
+			<configuration>
+				<property>
+					<name>mapred.compress.map.output</name>
+					<value>true</value>
+				</property>
+			</configuration>
+			<script>/user/cloudera/sample.hql</script>
+		</hive>
+		<ok to="javaAction" />
+		<error to="fail" />
+	</action>
+	    <action name="javaAction">
+        <java>
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+            <main-class>com.training.hadoop.Hello</main-class>
+			<arg>Naresh</arg>
+        </java>
+        <ok to="end"/>
+        <error to="fail"/>
+    </action>
+	<kill name="fail">
+		<message>Script failed, error
+			message[${wf:errorMessage(wf:lastErrorNode())}]</message>
 	</kill>
-	<end name="end">
-		<message>Action SUCCESSFULL [${wf:id()]</message>
-	</end>
+	<end name='end' />
 </workflow-app>
