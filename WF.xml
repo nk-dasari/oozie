@@ -1,7 +1,6 @@
 <workflow-app name="training-wf" xmlns="uri:oozie:workflow:0.1">
 
-	<!-- <start to="shellAction" /> -->
-	<start to="decAction"/>
+	<start to="shellAction" />
 	<action name='shellAction'>
 		<shell xmlns="uri:oozie:shell-action:0.1">
 			<job-tracker>${jobTracker}</job-tracker>
