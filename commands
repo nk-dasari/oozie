@@ -1,3 +1,5 @@
+Oozie commands
+--------------
 To submit a job
 ----------------
 oozie job -oozie http://quickstart.cloudera:11000/oozie/ -config WF.properties -run
