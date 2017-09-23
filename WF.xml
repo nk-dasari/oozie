@@ -1,6 +1,7 @@
 <workflow-app name="training-wf" xmlns="uri:oozie:workflow:0.1">
-	
-	<start to="shellAction" />
+
+	<!-- <start to="shellAction" /> -->
+	<start to="decAction"/>
 	<action name='shellAction'>
 		<shell xmlns="uri:oozie:shell-action:0.1">
 			<job-tracker>${jobTracker}</job-tracker>
@@ -10,10 +11,14 @@
 			<argument>B</argument>
 			<file>${EXEC}#${EXEC}</file> <!--Copy the executable to compute node's current working directory -->
 		</shell>
-		<ok to="hiveStep" />
+		<ok to="forkAction" />
 		<error to="fail" />
 	</action>
-	<action name="hiveStep">
+	<fork name="forkAction">
+		<path start="hiveAction" />
+		<path start="javaAction" />
+	</fork>
+	<action name="hiveAction">
 		<hive xmlns="uri:oozie:hive-action:0.2">
 			<job-tracker>${jobTracker}</job-tracker>
 			<name-node>${nameNode}</name-node>
@@ -23,22 +28,58 @@
 					<name>mapred.compress.map.output</name>
 					<value>true</value>
 				</property>
+				<property>
+					<name>mapred.job.queue.name</name>
+					<value>cloudera</value>
+				</property>
 			</configuration>
 			<script>/user/cloudera/sample.hql</script>
 		</hive>
-		<ok to="javaAction" />
+		<ok to="joinAction" />
 		<error to="fail" />
 	</action>
-	    <action name="javaAction">
-        <java>
+	<action name="javaAction">
+		<java>
 			<job-tracker>${jobTracker}</job-tracker>
 			<name-node>${nameNode}</name-node>
-            <main-class>com.training.hadoop.Hello</main-class>
+			<main-class>com.training.hadoop.Hello</main-class>
 			<arg>Naresh</arg>
-        </java>
-        <ok to="end"/>
-        <error to="fail"/>
-    </action>
+		</java>
+		<ok to="joinAction" />
+		<error to="fail" />
+	</action>
+	<join name="joinAction" to="decAction" />
+	<decision name="decAction">
+		<switch>
+			<case to="shellAction1">
+				${fs:fileSize("/user/cloudera/outputs/wout") gt 10 * GB}
+			</case>
+			<case to="shellAction2">
+				${fs:fileSize("/user/cloudera/outputs/wout") lt 100 * MB}
+			</case>
+			<default to="end" />
+		</switch>
+	</decision>
+	<action name='shellAction1'>
+		<shell xmlns="uri:oozie:shell-action:0.1">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<exec>${EXEC1}</exec>
+			<file>${EXEC1}#${EXEC1}</file> <!--Copy the executable to compute node's current working directory -->
+		</shell>
+		<ok to="end" />
+		<error to="fail" />
+	</action>
+	<action name='shellAction2'>
+		<shell xmlns="uri:oozie:shell-action:0.1">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<exec>${EXEC2}</exec>
+			<file>${EXEC2}#${EXEC2}</file> <!--Copy the executable to compute node's current working directory -->
+		</shell>
+		<ok to="end" />
+		<error to="fail" />
+	</action>
 	<kill name="fail">
 		<message>Script failed, error
 			message[${wf:errorMessage(wf:lastErrorNode())}]</message>
